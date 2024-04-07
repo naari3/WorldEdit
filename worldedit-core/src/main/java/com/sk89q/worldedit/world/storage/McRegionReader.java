@@ -134,6 +134,7 @@ public class McRegionReader {
 
         stream.seek((long) sectorNumber * SECTOR_BYTES);
         int length = dataStream.readInt();
+        System.err.println("Length: " + length);
 
         if (length > SECTOR_BYTES * numSectors) {
             throw new DataException("MCRegion chunk at "
