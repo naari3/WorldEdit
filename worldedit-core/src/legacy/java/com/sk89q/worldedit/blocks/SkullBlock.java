@@ -24,6 +24,8 @@ import com.sk89q.jnbt.StringTag;
 import com.sk89q.jnbt.Tag;
 import com.sk89q.worldedit.internal.util.DeprecationUtil;
 import com.sk89q.worldedit.world.block.BlockState;
+import org.enginehub.linbus.tree.LinCompoundTag;
+import org.enginehub.linbus.tree.LinTag;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -96,12 +98,12 @@ public class SkullBlock extends LegacyBaseBlockWrapper {
 
     @Override
     @Deprecated
-    public CompoundTag getNbtData() {
-        Map<String, Tag<?, ?>> values = new HashMap<>();
-        Map<String, Tag<?, ?>> inner = new HashMap<>();
-        inner.put("Name", new StringTag(owner));
-        values.put(DeprecationUtil.getHeadOwnerKey(), new CompoundTag(inner));
-        return new CompoundTag(values);
+    public LinCompoundTag getNbtData() {
+        Map<String, LinTag<?>> values = new HashMap<>();
+        Map<String, LinTag<?>> inner = new HashMap<>();
+        inner.put("Name", (new StringTag(owner)).toLinTag());
+        values.put(DeprecationUtil.getHeadOwnerKey(), LinCompoundTag.of(inner));
+        return LinCompoundTag.of(values);
     }
 
     @Override

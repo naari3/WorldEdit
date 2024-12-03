@@ -37,8 +37,8 @@ public class LegacyBaseBlockWrapper extends BaseBlock {
     @Nullable
     @Override
     public LazyReference<LinCompoundTag> getNbtReference() {
-        CompoundTag nbtData = getNbtData();
-        return nbtData == null ? null : LazyReference.from(nbtData::toLinTag);
+        LinCompoundTag nbtData = getNbtData();
+        return nbtData == null ? null : LazyReference.computed(nbtData);
     }
 
     @Override

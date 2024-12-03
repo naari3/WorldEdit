@@ -19,7 +19,8 @@
 
 package com.sk89q.worldedit.fabric;
 
-import com.mojang.serialization.Codec;
+import com.sk89q.jnbt.CompoundTag;
+import com.sk89q.jnbt.Tag;
 import com.sk89q.worldedit.blocks.BaseItemStack;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.fabric.internal.FabricTransmogrifier;
@@ -33,7 +34,6 @@ import com.sk89q.worldedit.util.concurrency.LazyReference;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.biome.BiomeType;
 import com.sk89q.worldedit.world.biome.BiomeTypes;
-import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockType;
 import com.sk89q.worldedit.world.block.BlockTypes;
@@ -41,10 +41,7 @@ import com.sk89q.worldedit.world.item.ItemType;
 import com.sk89q.worldedit.world.item.ItemTypes;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.StringRepresentable;
@@ -53,10 +50,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.Vec3;
 import org.enginehub.linbus.tree.LinCompoundTag;
+import org.enginehub.linbus.tree.LinTag;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -93,7 +90,7 @@ public final class FabricAdapter {
 
     public static Biome adapt(BiomeType biomeType) {
         return FabricWorldEdit.getRegistry(Registries.BIOME)
-            .get(new ResourceLocation(biomeType.id()));
+                .get(new ResourceLocation(biomeType.id()));
     }
 
     public static BiomeType adapt(Biome biome) {
@@ -204,20 +201,6 @@ public final class FabricAdapter {
         return worldEdit;
     }
 
-    public static BaseBlock adapt(BlockEntity blockEntity) {
-        if (!blockEntity.hasLevel()) {
-            throw new IllegalArgumentException("BlockEntity must have a level");
-        }
-        int blockStateId = Block.getId(blockEntity.getBlockState());
-        BlockState worldEdit = BlockStateIdAccess.getBlockStateById(blockStateId);
-        if (worldEdit == null) {
-            worldEdit = FabricTransmogrifier.transmogToWorldEdit(blockEntity.getBlockState());
-        }
-        // Save this outside the reference to ensure it doesn't mutate
-        CompoundTag savedNative = blockEntity.saveWithId(blockEntity.getLevel().registryAccess());
-        return worldEdit.toBaseBlock(LazyReference.from(() -> NBTConverter.fromNative(savedNative)));
-    }
-
     public static Block adapt(BlockType blockType) {
         return FabricWorldEdit.getRegistry(Registries.BLOCK).get(new ResourceLocation(blockType.id()));
     }
@@ -234,34 +217,30 @@ public final class FabricAdapter {
         return ItemTypes.get(FabricWorldEdit.getRegistry(Registries.ITEM).getKey(item).toString());
     }
 
-    /**
-     * For serializing and deserializing components.
-     */
-    private static final Codec<DataComponentPatch> COMPONENTS_CODEC = DataComponentPatch.CODEC.optionalFieldOf(
-        "components", DataComponentPatch.EMPTY
-    ).codec();
-
     public static ItemStack adapt(BaseItemStack baseItemStack) {
-        final ItemStack itemStack = new ItemStack(adapt(baseItemStack.getType()), baseItemStack.getAmount());
-        LinCompoundTag nbt = baseItemStack.getNbt();
-        if (nbt != null) {
-            DataComponentPatch componentPatch = COMPONENTS_CODEC.parse(
-                FabricWorldEdit.registryAccess().createSerializationContext(NbtOps.INSTANCE),
-                NBTConverter.toNative(nbt)
-            ).getOrThrow();
-            itemStack.applyComponents(componentPatch);
+        net.minecraft.nbt.CompoundTag fabricCompound = null;
+        if (baseItemStack.getNbt() != null) {
+            fabricCompound = NBTConverter.toNative(baseItemStack.getNbt());
         }
+        final ItemStack itemStack = new ItemStack(adapt(baseItemStack.getType()), baseItemStack.getAmount());
+        itemStack.setTag(fabricCompound);
         return itemStack;
     }
 
     public static BaseItemStack adapt(ItemStack itemStack) {
-        CompoundTag tag = (CompoundTag) COMPONENTS_CODEC.encodeStart(
-            FabricWorldEdit.registryAccess().createSerializationContext(NbtOps.INSTANCE),
-            itemStack.getComponentsPatch()
-        ).getOrThrow();
-        return new BaseItemStack(
-            adapt(itemStack.getItem()), LazyReference.from(() -> NBTConverter.fromNative(tag)), itemStack.getCount()
-        );
+        LinCompoundTag tag = NBTConverter.fromNative(itemStack.save(new net.minecraft.nbt.CompoundTag()));
+        if (tag.value().isEmpty()) {
+            tag = null;
+        } else {
+            final LinTag<?> tagTag = tag.value().get("tag");
+            if (tagTag instanceof LinCompoundTag) {
+                tag = ((LinCompoundTag) tagTag);
+            } else {
+                tag = null;
+            }
+        }
+        LazyReference<LinCompoundTag> ltag = LazyReference.computed(tag);
+        return new BaseItemStack(adapt(itemStack.getItem()), ltag, itemStack.getCount());
     }
 
     /**

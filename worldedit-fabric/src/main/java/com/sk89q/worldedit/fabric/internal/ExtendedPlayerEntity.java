@@ -17,43 +17,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.sk89q.jnbt;
+package com.sk89q.worldedit.fabric.internal;
 
-import org.enginehub.linbus.tree.LinTag;
-import org.enginehub.linbus.tree.ToLinTag;
+public interface ExtendedPlayerEntity {
 
-import javax.annotation.Nonnull;
+    String getLanguage();
 
-/**
- * Represents a NBT tag.
- *
- * @deprecated JNBT is being removed for lin-bus in WorldEdit 8, use {@link LinTag} instead
- */
-@Deprecated
-public class Tag<V, LT extends LinTag<? extends V>> implements ToLinTag<LT> {
-    protected final LT linTag;
-
-    protected Tag(LT linTag) {
-        this.linTag = linTag;
-    }
-
-    /**
-     * Gets the value of this tag.
-     *
-     * @return the value
-     */
-    public V getValue() {
-        return linTag.value();
-    }
-
-    @Override
-    public String toString() {
-        return toLinTag().toString();
-    }
-
-    @Override
-    @Nonnull
-    public LT toLinTag() {
-        return linTag;
-    }
 }

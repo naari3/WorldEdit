@@ -61,9 +61,8 @@ public interface NbtValued {
      */
     @Deprecated
     @Nullable
-    default CompoundTag getNbtData() {
-        LinCompoundTag tag = getNbt();
-        return tag == null ? null : new CompoundTag(tag);
+    default LinCompoundTag getNbtData() {
+        return getNbt();
     }
 
     /**
@@ -104,8 +103,8 @@ public interface NbtValued {
         DeprecationUtil.checkDelegatingOverride(getClass());
 
         @SuppressWarnings("deprecation")
-        CompoundTag nbtData = getNbtData();
-        return nbtData == null ? null : LazyReference.from(nbtData::toLinTag);
+        LinCompoundTag nbtData = getNbtData();
+        return nbtData == null ? null : LazyReference.computed(nbtData);
     }
 
     /**

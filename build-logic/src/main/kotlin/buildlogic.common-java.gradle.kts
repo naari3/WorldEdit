@@ -17,9 +17,9 @@ tasks
     .configureEach {
         // TODO: re-enable this-escape when ANTLR suppresses it properly
         val disabledLint = listOf(
-            "processing", "path", "fallthrough", "serial", "overloads", "this-escape",
+            "processing", "path", "fallthrough", "serial", "overloads",
         )
-        options.release.set(21)
+        options.release.set(17)
         options.compilerArgs.addAll(listOf("-Xlint:all") + disabledLint.map { "-Xlint:-$it" })
         options.isDeprecation = true
         options.encoding = "UTF-8"

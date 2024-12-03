@@ -1883,7 +1883,7 @@ class FabricDataFixer extends DataFixerBuilder implements com.sk89q.worldedit.wo
 
                                 if (object == null) {
                                     try {
-                                        object = Component.Serializer.fromJson(s, FabricWorldEdit.registryAccess());
+                                        object = Component.Serializer.fromJson(s);
                                     } catch (JsonParseException jsonparseexception1) {
                                         ;
                                     }
@@ -1891,7 +1891,7 @@ class FabricDataFixer extends DataFixerBuilder implements com.sk89q.worldedit.wo
 
                                 if (object == null) {
                                     try {
-                                        object = Component.Serializer.fromJsonLenient(s, FabricWorldEdit.registryAccess());
+                                        object = Component.Serializer.fromJsonLenient(s);
                                     } catch (JsonParseException jsonparseexception2) {
                                         ;
                                     }
@@ -1905,7 +1905,7 @@ class FabricDataFixer extends DataFixerBuilder implements com.sk89q.worldedit.wo
                             object = Component.literal("");
                         }
 
-                        nbttaglist.set(i, StringTag.valueOf(Component.Serializer.toJson((Component) object, FabricWorldEdit.registryAccess())));
+                        nbttaglist.set(i, StringTag.valueOf(Component.Serializer.toJson((Component) object)));
                     }
 
                     nbttagcompound1.put("pages", nbttaglist);
@@ -2548,7 +2548,7 @@ class FabricDataFixer extends DataFixerBuilder implements com.sk89q.worldedit.wo
 
                     if (object == null) {
                         try {
-                            object = Component.Serializer.fromJson(s1, FabricWorldEdit.registryAccess());
+                            object = Component.Serializer.fromJson(s1);
                         } catch (JsonParseException jsonparseexception1) {
                             ;
                         }
@@ -2556,7 +2556,7 @@ class FabricDataFixer extends DataFixerBuilder implements com.sk89q.worldedit.wo
 
                     if (object == null) {
                         try {
-                            object = Component.Serializer.fromJsonLenient(s1, FabricWorldEdit.registryAccess());
+                            object = Component.Serializer.fromJsonLenient(s1);
                         } catch (JsonParseException jsonparseexception2) {
                             ;
                         }
@@ -2570,7 +2570,7 @@ class FabricDataFixer extends DataFixerBuilder implements com.sk89q.worldedit.wo
                 object = Component.literal("");
             }
 
-            nbttagcompound.putString(s, Component.Serializer.toJson((Component) object, FabricWorldEdit.registryAccess()));
+            nbttagcompound.putString(s, Component.Serializer.toJson((Component) object));
         }
     }
 

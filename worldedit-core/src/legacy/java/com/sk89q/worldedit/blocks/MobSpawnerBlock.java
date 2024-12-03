@@ -28,6 +28,10 @@ import com.sk89q.jnbt.StringTag;
 import com.sk89q.jnbt.Tag;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.storage.InvalidFormatException;
+import org.enginehub.linbus.tree.LinCompoundTag;
+import org.enginehub.linbus.tree.LinListTag;
+import org.enginehub.linbus.tree.LinTag;
+import org.enginehub.linbus.tree.LinTagType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -124,25 +128,25 @@ public class MobSpawnerBlock extends LegacyBaseBlockWrapper {
 
     @Override
     @Deprecated
-    public CompoundTag getNbtData() {
-        Map<String, Tag<?, ?>> values = new HashMap<>();
-        values.put("Delay", new ShortTag(delay));
-        values.put("SpawnCount", new ShortTag(spawnCount));
-        values.put("SpawnRange", new ShortTag(spawnRange));
-        values.put("MinSpawnDelay", new ShortTag(minSpawnDelay));
-        values.put("MaxSpawnDelay", new ShortTag(maxSpawnDelay));
-        values.put("MaxNearbyEntities", new ShortTag(maxNearbyEntities));
-        values.put("RequiredPlayerRange", new ShortTag(requiredPlayerRange));
+    public LinCompoundTag getNbtData() {
+        Map<String, LinTag<?>> values = new HashMap<>();
+        values.put("Delay", new ShortTag(delay).toLinTag());
+        values.put("SpawnCount", new ShortTag(spawnCount).toLinTag());
+        values.put("SpawnRange", new ShortTag(spawnRange).toLinTag());
+        values.put("MinSpawnDelay", new ShortTag(minSpawnDelay).toLinTag());
+        values.put("MaxSpawnDelay", new ShortTag(maxSpawnDelay).toLinTag());
+        values.put("MaxNearbyEntities", new ShortTag(maxNearbyEntities).toLinTag());
+        values.put("RequiredPlayerRange", new ShortTag(requiredPlayerRange).toLinTag());
         if (spawnData == null) {
-            values.put("SpawnData", new CompoundTag(ImmutableMap.of("entity", new CompoundTag(ImmutableMap.of("id", new StringTag(mobType))))));
+            values.put("SpawnData", LinCompoundTag.of(ImmutableMap.of("entity", LinCompoundTag.of(ImmutableMap.of("id", new StringTag(mobType).toLinTag())))));
         } else {
-            values.put("SpawnData", new CompoundTag(spawnData.getValue()));
+            values.put("SpawnData", LinCompoundTag.of(spawnData.toLinTag().value()));
         }
         if (spawnPotentials != null) {
-            values.put("SpawnPotentials", new ListTag(CompoundTag.class, spawnPotentials.getValue()));
+            values.put("SpawnPotentials", LinListTag.of(LinTagType.compoundTag(), spawnPotentials.getValue().stream().map(tag -> (LinCompoundTag) tag.toLinTag()).toList()));
         }
 
-        return new CompoundTag(values);
+        return LinCompoundTag.of(values);
     }
 
     @Override

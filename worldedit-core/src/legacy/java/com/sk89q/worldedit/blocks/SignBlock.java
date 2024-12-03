@@ -28,6 +28,8 @@ import com.sk89q.worldedit.extension.platform.Capability;
 import com.sk89q.worldedit.internal.Constants;
 import com.sk89q.worldedit.util.gson.GsonUtil;
 import com.sk89q.worldedit.world.block.BlockState;
+import org.enginehub.linbus.tree.LinCompoundTag;
+import org.enginehub.linbus.tree.LinTag;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -108,20 +110,20 @@ public class SignBlock extends LegacyBaseBlockWrapper {
 
     @Override
     @Deprecated
-    public CompoundTag getNbtData() {
-        Map<String, Tag<?, ?>> values = new HashMap<>();
+    public LinCompoundTag getNbtData() {
+        Map<String, LinTag<?>> values = new HashMap<>();
         if (isLegacy()) {
-            values.put("Text1", new StringTag(text[0]));
-            values.put("Text2", new StringTag(text[1]));
-            values.put("Text3", new StringTag(text[2]));
-            values.put("Text4", new StringTag(text[3]));
+            values.put("Text1", new StringTag(text[0]).toLinTag());
+            values.put("Text2", new StringTag(text[1]).toLinTag());
+            values.put("Text3", new StringTag(text[2]).toLinTag());
+            values.put("Text4", new StringTag(text[3]).toLinTag());
         } else {
             ListTag<?, ?> messages = new ListTag<>(StringTag.class, Arrays.stream(text).map(StringTag::new).collect(Collectors.toList()));
-            Map<String, Tag<?, ?>> frontTextTag = new HashMap<>();
-            frontTextTag.put("messages", messages);
-            values.put("front_text", new CompoundTag(frontTextTag));
+            Map<String, LinTag<?>> frontTextTag = new HashMap<>();
+            frontTextTag.put("messages", messages.toLinTag());
+            values.put("front_text", LinCompoundTag.of(frontTextTag));
         }
-        return new CompoundTag(values);
+        return LinCompoundTag.of(values);
     }
 
     @Override

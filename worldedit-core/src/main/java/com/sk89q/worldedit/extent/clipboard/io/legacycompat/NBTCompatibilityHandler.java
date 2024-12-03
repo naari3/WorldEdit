@@ -54,10 +54,11 @@ public interface NBTCompatibilityHandler {
             }
             return builder.build();
         })));
-        CompoundTag data = changed.getNbtData();
+        LinCompoundTag data = changed.getNbtData();
+        CompoundTag data2 = new CompoundTag(data);
         values.clear();
         if (data != null) {
-            values.putAll(data.getValue());
+            values.putAll(data2.getValue());
         }
         return changed;
     }

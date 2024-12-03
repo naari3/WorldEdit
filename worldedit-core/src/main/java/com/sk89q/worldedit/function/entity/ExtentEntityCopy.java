@@ -186,24 +186,31 @@ public class ExtentEntityCopy implements EntityFunction {
                     .putInt("TileY", newTilePosition.y())
                     .putInt("TileZ", newTilePosition.z());
 
-                if (tryGetFacingData(tag) instanceof FacingTagData(String facingKey, LinNumberTag<?> tagFacing)) {
-                    boolean isPainting = state.getType() == EntityTypes.PAINTING; // Paintings have different facing values
-                    Direction direction = isPainting
-                        ? MCDirections.fromHorizontalHanging(tagFacing.value().intValue())
-                        : MCDirections.fromHanging(tagFacing.value().intValue());
+                FacingTagData result = tryGetFacingData(tag);
+                if (result instanceof FacingTagData) {
+                    FacingTagData data = result;
+                    if (data.facingKey() != null && data.tagFacing() instanceof LinNumberTag<?>) {
+                        String facingKey = data.facingKey();
+                        LinNumberTag<?> tagFacing = (LinNumberTag<?>) data.tagFacing();
+                        boolean isPainting = state.getType() == EntityTypes.PAINTING; // Paintings have different facing values
+                        Direction direction = isPainting
+                                ? MCDirections.fromHorizontalHanging(tagFacing.value().intValue())
+                                : MCDirections.fromHanging(tagFacing.value().intValue());
 
-                    if (direction != null) {
-                        Vector3 vector = transform.apply(direction.toVector()).subtract(transform.apply(Vector3.ZERO)).normalize();
-                        Direction newDirection = Direction.findClosest(vector, Flag.CARDINAL);
+                        if (direction != null) {
+                            Vector3 vector = transform.apply(direction.toVector()).subtract(transform.apply(Vector3.ZERO)).normalize();
+                            Direction newDirection = Direction.findClosest(vector, Flag.CARDINAL);
 
-                        if (newDirection != null) {
-                            byte facingValue = (byte) (
-                                isPainting
-                                    ? MCDirections.toHorizontalHanging(newDirection)
-                                    : MCDirections.toHanging(newDirection)
-                            );
-                            builder.putByte(facingKey, facingValue);
+                            if (newDirection != null) {
+                                byte facingValue = (byte) (
+                                        isPainting
+                                                ? MCDirections.toHorizontalHanging(newDirection)
+                                                : MCDirections.toHanging(newDirection)
+                                );
+                                builder.putByte(facingKey, facingValue);
+                            }
                         }
+
                     }
                 }
 
